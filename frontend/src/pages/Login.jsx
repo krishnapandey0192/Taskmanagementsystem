@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../redux/user/useSlice";
+import { loginFormValidation } from "../utils/validation/formvalidations";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -14,6 +15,7 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [validationErrors, setValidationErrors] = useState({});
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -21,7 +23,11 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    const errors = loginFormValidation(formData);
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
     const res = await dispatch(loginUser(formData));
 
     // console.log(res, "ressssssss---------");
@@ -95,7 +101,11 @@ const Login = () => {
                 />
               </div>
 
-              {error && <p className="text-red-500 text-sm">{error}</p>}
+              {validationErrors && (
+                <p className="text-red-500 text-sm">
+                  {validationErrors.password}
+                </p>
+              )}
 
               <button
                 type="submit"

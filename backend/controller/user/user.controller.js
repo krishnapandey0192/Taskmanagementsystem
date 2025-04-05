@@ -17,12 +17,12 @@ export const userSignUp = async (req, res) => {
       return sendResponse(res, false, 400, "Email is already taken", null);
     }
 
-    // const hsashedPassword = await bcrypt.hash(password, 10);
+    const hsashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await userModel.create({
       name,
       email,
-      password,
+      password: hsashedPassword,
     });
     newUser.password = undefined;
 
@@ -49,12 +49,16 @@ export const userSignUp = async (req, res) => {
 export const userSignIn = async (req, res) => {
   try {
     const { email, password } = req.body;
+    if (!email || !password) {
+      return sendResponse(res, false, 400, "All feilds are requred", null);
+    }
     const user = await userModel.findOne({ email });
+
+    console.log("user", user);
     if (!user) {
       return sendResponse(res, false, 400, "User does not exist", null);
     }
-    const comparePassword = bcrypt.compare(password, user.password);
-
+    const comparePassword = await bcrypt.compare(password, user.password);
     if (!comparePassword) {
       return sendResponse(res, false, 400, "Invalid email or password", null);
     }
@@ -64,7 +68,6 @@ export const userSignIn = async (req, res) => {
       environmentConfig.jwtSecret,
       { expiresIn: "1d" }
     );
-
     user.password = undefined;
     return res.status(200).json({
       isSuccess: true,
@@ -73,19 +76,27 @@ export const userSignIn = async (req, res) => {
       accessToken: token,
     });
   } catch (error) {
+    console.log("error in login", error);
     return sendResponse(res, false, 500, "Internal Server Error", null);
   }
 };
 
-export const getAllEmployee = async(req,res)=>{
+export const getAllEmployee = async (req, res) => {
   try {
-  const employees = await userModel.find({ role: "employee" }).select("-password");
-  if(!employees){
-   return sendResponse(res,false,403,"Employee not found",null)
-  }
-  return sendResponse(res,true,200,"Employee fetch successfully",employees)
-    
+    const employees = await userModel
+      .find({ role: "employee" })
+      .select("-password");
+    if (!employees) {
+      return sendResponse(res, false, 403, "Employee not found", null);
+    }
+    return sendResponse(
+      res,
+      true,
+      200,
+      "Employee fetch successfully",
+      employees
+    );
   } catch (error) {
- return   sendResponse(res,false,500,"Internal Server Error",null)
+    return sendResponse(res, false, 500, "Internal Server Error", null);
   }
-} 
+};

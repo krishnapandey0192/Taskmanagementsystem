@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../redux/user/useSlice";
+import { signupFormValidation } from "../utils/validation/formvalidations";
 
 const Signup = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error } = useSelector((state) => state.user);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const [formData, setFormData] = useState({
     name: "",
@@ -20,7 +22,11 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    const error = signupFormValidation(formData);
+    if (Object.keys(error).length > 0) {
+      setValidationErrors(error);
+      return;
+    }
     const res = await dispatch(registerUser(formData));
 
     if (res.payload.isSuccess) {
@@ -67,6 +73,9 @@ const Signup = () => {
                   className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600"
                 />
               </div>
+              {validationErrors && (
+                <p className="text-red-500 text-sm">{validationErrors.name}</p>
+              )}
               <div>
                 <label
                   htmlFor="email"
@@ -85,6 +94,9 @@ const Signup = () => {
                   className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600"
                 />
               </div>
+              {validationErrors && (
+                <p className="text-red-500 text-sm">{validationErrors.email}</p>
+              )}
               <div>
                 <label
                   htmlFor="password"
@@ -104,7 +116,11 @@ const Signup = () => {
                 />
               </div>
 
-              {error && <p className="text-red-500 text-sm">{error}</p>}
+              {validationErrors && (
+                <p className="text-red-500 text-sm">
+                  {validationErrors.password}
+                </p>
+              )}
 
               <button
                 type="submit"

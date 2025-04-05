@@ -38,6 +38,7 @@ const TaskForm = ({ employeeList, initialData = {}, onSubmit, onCancel }) => {
         onChange={handleChange}
         placeholder="Description"
         className="border p-2 w-full"
+        required
       />
 
       <select
@@ -62,12 +63,12 @@ const TaskForm = ({ employeeList, initialData = {}, onSubmit, onCancel }) => {
         <option value="low">Low</option>
       </select>
 
-
       <select
         name="assignedTo"
         value={formData.assignedTo}
         onChange={handleChange}
         className="border p-2 w-full"
+        required
       >
         <option value="">Select Employee</option>
         {employeeList &&
@@ -77,8 +78,6 @@ const TaskForm = ({ employeeList, initialData = {}, onSubmit, onCancel }) => {
             </option>
           ))}
       </select>
-
-
 
       <div className="flex justify-between gap-4">
         <button
